@@ -1,11 +1,14 @@
 package com.api.picpaysimplificado.services;
 
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.api.picpaysimplificado.dtos.PaymentKeyDTO;
+import com.api.picpaysimplificado.dtos.PublicUserDTO;
 import com.api.picpaysimplificado.entities.PaymentKey;
 import com.api.picpaysimplificado.entities.User;
+import com.api.picpaysimplificado.exceptions.PaymentKeyNotFoundException;
 import com.api.picpaysimplificado.exceptions.UserNotFoundException;
 import com.api.picpaysimplificado.repositories.PaymentKeyRepository;
 import com.api.picpaysimplificado.repositories.UserRepository;
@@ -36,6 +39,17 @@ public class PaymentKeyService {
         paymentKey.setKeyType(paymentKeyDTO.getKeyType());
 
         paymentKeyRepository.save(paymentKey);
+    }
+
+    public PublicUserDTO getUserByPaymentKeyValue(String paymentKeyValue) {
+        PaymentKey paymentKey = paymentKeyRepository.findByKeyValue(paymentKeyValue)
+            .orElseThrow(() -> new PaymentKeyNotFoundException("Payment Key not found"));
+
+        User user = paymentKey.getUser();
+        PublicUserDTO publicUserDTO = new PublicUserDTO();
+        BeanUtils.copyProperties(user, publicUserDTO);
+
+        return publicUserDTO;
     }
 
 }

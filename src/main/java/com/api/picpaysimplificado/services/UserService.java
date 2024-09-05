@@ -15,7 +15,6 @@ import jakarta.validation.Valid;
 @Service
 public class UserService {
     
-
     @Autowired
     private UserRepository userRepository;
 
@@ -29,20 +28,34 @@ public class UserService {
         return userDTO;
     }
 
-    public void saveUser(@Valid UserSaveDTO data) {
+    public void saveUser(@Valid UserSaveDTO userSaveDTO) {
         User newUser = new User();
         newUser.setValue(0.0);
-        BeanUtils.copyProperties(data, newUser);
+        BeanUtils.copyProperties(userSaveDTO, newUser);
 
         userRepository.save(newUser);
     }
 
-        // TODO: REMOVE LATER
-        public void admin(Long id) {
-            User user = userRepository.findById(id)
-                .orElseThrow(() -> new UserNotFoundException("admin: user not found"));
-    
-                user.setValue(1000.0);
-                userRepository.save(user);
-        }
+    public void updateUser(@Valid UserSaveDTO userSaveDTO, Long userId) {
+        User user = userRepository.findById(userId)
+        .orElseThrow(() -> new UserNotFoundException("User not found"));
+        
+        BeanUtils.copyProperties(userSaveDTO, user);
+        userRepository.save(user);
+    }
+
+    public void deleteUser(Long userId) {
+        User user = userRepository.findById(userId)
+            .orElseThrow(() -> new UserNotFoundException("User not found"));
+
+        userRepository.delete(user);
+    }
+
+    // TODO: REMOVE LATER
+    public void admin(Long id) {
+        User user = userRepository.findById(id)
+            .orElseThrow(() -> new UserNotFoundException("admin: user not found"));
+            user.setValue(1000.0);
+            userRepository.save(user);
+    }
 }

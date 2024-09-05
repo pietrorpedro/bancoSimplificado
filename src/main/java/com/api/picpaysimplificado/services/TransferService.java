@@ -16,6 +16,7 @@ import com.api.picpaysimplificado.exceptions.UserNotFoundException;
 import com.api.picpaysimplificado.repositories.PaymentKeyRepository;
 import com.api.picpaysimplificado.repositories.TransferRepository;
 import com.api.picpaysimplificado.repositories.UserRepository;
+import com.api.picpaysimplificado.types.UserType;
 
 import jakarta.transaction.Transactional;
 
@@ -43,8 +44,16 @@ public class TransferService {
 
         User payee = payeeKey.getUser();
 
+        if (payer.getUserType() == UserType.SHOPKEEPER) {
+            throw new UnauthorizedException("Unauthorized Transfer");
+        }
+        
         if (payer.getValue() < transferDTO.getValue()) {
             throw new IllegalArgumentException("Insufficient funds for the transfer");
+        }
+
+        if (transferDTO.getValue() <= 0) {
+            throw new IllegalArgumentException("Invalid Value");
         }
 
         if (!checkAuthorization()) {
